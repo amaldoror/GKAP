@@ -12,6 +12,9 @@ repositories {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'org.graphstream:gs-core:2.0'
+    implementation 'org.graphstream:gs-algo:2.0'
+    implementation 'org.graphstream:gs-ui-swing:2.0'
 }
 
 test {
