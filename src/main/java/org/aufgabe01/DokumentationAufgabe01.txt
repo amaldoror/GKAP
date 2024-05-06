@@ -1,0 +1,29 @@
+eMail: peer.stelldinger@haw-hamburg.de
+
+Betreff: GKA Praktikum Gruppe 4 Team [1-10]
+
+Team: Jonas Hildebrandt, Adrian Morgenthal
+
+Aufgabenaufteilung:
+a)  Aufgaben, für die Teammitglied 1 verantwortlich ist;
+    Dateien, die komplett/zum Teil von Teammitglied 1 implementiert/bearbeitet wurden
+b)  Aufgaben, für die Teammitglied 2 verantwortlich ist;
+    Dateien, die komplett/zum Teil von Teammitglied 2 implementiert/bearbeitet wurden
+
+Quellenangaben:
+
+Bearbeitungszeitraum:
+Datum und Dauer der Bearbeitung an der Aufgabe von allen Teammitgliedern und Angabe der gemeinsamen Bearbeitungszeiten
+
+
+Beschreibung der Algorithmen:
+
+Datenstrukturen:
+
+Wesentliche Entwurfsentscheidungen der Implementierung:
+
+Umsetzung der Aspekte der Implementierung:
+
+Umfassende Dokumentation der Testfälle, wobei die Abdeckung der Testfälle diskutiert werden soll
+
+Beantwortung der in der Aufgabe gestellten Fragen
