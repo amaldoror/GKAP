@@ -25,9 +25,10 @@ import java.util.Queue;
 
 public class BFSearch {
 
-    public static void bfSearch(Graph graph, String startNodeId) {
+    public static void bfSearch(Graph graph, String startNodeId, String goalNodeId) {
 
         Node startNode = graph.getNode(startNodeId);
+        Node goalNode = graph.getNode(goalNodeId);
 
         if (startNode == null) {
             System.err.println("Startknoten nicht im Graphen gefunden.");
@@ -47,6 +48,7 @@ public class BFSearch {
         while (!queue.isEmpty()) {
             // Aktuellen Knoten aus der Queue holen
             Node currentNode = queue.poll();
+
             // NodeID ausgeben
             getNodeID(currentNode);
 

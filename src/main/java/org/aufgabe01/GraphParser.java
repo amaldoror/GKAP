@@ -2,6 +2,7 @@ package org.aufgabe01;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 
 import java.io.*;
@@ -136,6 +137,10 @@ public class GraphParser {
                     "GraphID: "     + graphID + "\n" +
                     "is weighted: " + isWeighted + "\n" +
                     "is directed: " + isDirected);
+
+
+            graph.display();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -150,7 +155,7 @@ public class GraphParser {
      * @param nodeId Die ID des hinzugefügten Knotens.
      */
     private static void addNodeIfNotExists(Graph graph, String nodeId) {
-        if (graph.getNode(nodeId) == null) {
+        if (!isNodeExistent(graph, nodeId)) {
             graph.addNode(nodeId);
             graph.getNode(nodeId).setAttribute("ui.label", nodeId);
             graph.getNode(nodeId).setAttribute("ui.style",
@@ -197,14 +202,24 @@ public class GraphParser {
     /**
      * Überprüft, ob ein Knoten mit dem angegebenen Namen bereits im Graphen vorhanden ist.
      *
-     * @param graph    Der Graph, in dem überprüft werden soll.
-     * @param nodeID Der Name des Knotens, der überprüft werden soll.
-     * @return True, wenn der Knoten bereits vorhanden ist, sonst false.
+     * @param graph     Der Graph, in dem überprüft werden soll.
+     * @param nodeID    Der Name des Knotens, der überprüft werden soll.
+     * @return          True, wenn der Knoten bereits vorhanden ist, sonst false.
      */
     public static boolean isNodeExistent(Graph graph, String nodeID) {
         return graph.getNode(nodeID) != null;
     }
 
+    /**
+     * Überprüft, ob eine Kante mit dem angegebenen Namen bereits im Graphen vorhanden ist.
+     *
+     * @param graph     Der Graph, in dem überprüft werden soll.
+     * @param edgeID    Der Name der Kante, die überprüft werden soll.
+     * @return          True, wenn der Knoten bereits vorhanden ist, sonst false.
+     */
+    public static boolean isEdgeExistent(Graph graph, String edgeID) {
+        return graph.getEdge(edgeID) != null;
+    }
 
     /**
      * Generiert einen zufälligen Graphen mit einer gegebenen Anzahl von Knoten und Kanten.
@@ -212,9 +227,34 @@ public class GraphParser {
      * @param graph     Der Graph, der aktualisiert werden soll.
      * @param numNodes  Die Anzahl der Knoten im Graphen.
      * @param numEdges  Die Anzahl der Kanten im Graphen.
+     * @param isDirected Ist der Graph gerichtet? Default ist false
+     * @param isWeighted Ist der Graph gewichtet? Default ist false
      */
-    public static void generateRandomGraph(Graph graph, int numNodes, int numEdges) {
+    public static void generateRandomGraph(Graph graph, int numNodes, int numEdges, boolean isDirected, boolean isWeighted){
+        _generateRandomGraph(graph, numNodes, numEdges, isDirected, isWeighted);
+    }
+
+    public static void generateRandomGraph(Graph graph, int numNodes, int numEdges){
+        _generateRandomGraph(graph, numNodes, numEdges, false, false);
+    }
+
+    public static void generateRandomGraph(Graph graph){
+        Random rand = new Random();
+        _generateRandomGraph(graph, rand.nextInt(), rand.nextInt(), false, false);
+    }
+
+    public static void generateRandomGraph(){
+        Random rand = new Random();
+        Graph graph = new SingleGraph("randomGraph");
+        _generateRandomGraph(graph, rand.nextInt(), rand.nextInt(), false, false);
+    }
+
+    // Private helper method
+    private static void _generateRandomGraph(Graph graph, int numNodes, int numEdges, boolean isDirected, boolean isWeighted) {
         Random random = new Random();
+        graph.getAttribute("");
+        String direction = isDirected ? " -> " : " -- ";
+
 
         // Knoten hinzufügen
         for (int i = 0; i < numNodes; i++) {
@@ -226,34 +266,9 @@ public class GraphParser {
         for (int i = 0; i < numEdges; i++) {
             String nodeA = "Node" + random.nextInt(numNodes);
             String nodeB = "Node" + random.nextInt(numNodes);
-            graph.addEdge(nodeA + "_" + nodeB, nodeA, nodeB);
+            String weight = isWeighted ? " : " + random.nextInt() + ";" : "";
+            graph.addEdge((nodeA + direction + nodeB + weight), nodeA, nodeB);
         }
     }
 
-    /**
-     * Misst die Ausführungszeit einer übergebenen Operation.
-     *
-     * @param operation Die Operation, deren Ausführungszeit gemessen werden soll.
-     * @return Die gemessene Ausführungszeit in Millisekunden.
-     */
-    public static long measureExecutionTime(Runnable operation) {
-        long startTime = System.currentTimeMillis();
-        operation.run();
-        long endTime = System.currentTimeMillis();
-        return endTime - startTime;
-    }
-
-    /**
-     * Überprüft den Speicherverbrauch vor und nach der Ausführung einer Operation.
-     *
-     * @param operation Die Operation, deren Speicherverbrauch überprüft werden soll.
-     */
-    public static void checkMemoryUsage(Runnable operation) {
-        Runtime runtime = Runtime.getRuntime();
-        long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
-        operation.run();
-        long memoryAfter = runtime.totalMemory() - runtime.freeMemory();
-        long memoryUsed = memoryAfter - memoryBefore;
-        System.out.println("Speicherverbrauch: " + memoryUsed + " Bytes");
-    }
 }

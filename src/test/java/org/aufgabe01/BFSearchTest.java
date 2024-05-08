@@ -19,14 +19,10 @@ class BFSearchTest {
 
     @BeforeEach
     void setUp() {
+
         // Initialisiere den Graphen für jeden Testfall
-        graph = new SingleGraph("testGraph");
-        graph.addNode("A");
-        graph.addNode("B");
-        graph.addNode("C");
-        graph.addEdge("AB", "A", "B");
-        graph.addEdge("BC", "B", "C");
-        graph.addEdge("CA", "C", "A");
+        String filePath = "resources/graphs/graph01.gka";
+        graph = GraphParser.makeGraphFromFile(filePath);
     }
 
     @AfterEach
@@ -38,10 +34,10 @@ class BFSearchTest {
     @Test
     void bfSearch() {
         // Erwartete Ergebnisse definieren
-        List<String> expectedVisitedNodes = Arrays.asList("A", "B", "C");
+        List<String> expectedVisitedNodes = Arrays.asList("a", "b", "b");
 
         // BFSearch auf dem Graphen ausführen
-        BFSearch.bfSearch(graph, "A");
+        BFSearch.bfSearch(graph, "a", "b");
 
         // Besuchte Knoten aus dem Graphen abrufen
         List<String> actualVisitedNodes = new ArrayList<>();

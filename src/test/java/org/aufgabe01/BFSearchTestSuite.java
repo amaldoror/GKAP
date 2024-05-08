@@ -2,23 +2,15 @@ package org.aufgabe01;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.utils.AnalysisUtils;
 
 public class BFSearchTestSuite {
 
     public static void main(String[] args) {
-        // Testfall: Leistungstest
         performanceTest();
-
-        // Testfall: Speichertest
         memoryTest();
-
-        // Testfall: Validierungstest
         validationTest();
-
-        // Testfall: Randtest
         edgeCaseTest();
-
-        // Testfall: Stresstest
         stressTest();
     }
 
@@ -31,8 +23,8 @@ public class BFSearchTestSuite {
             int numEdges = i * 5000;
             Graph graph = new SingleGraph("randomGraph");
             GraphParser.generateRandomGraph(graph, numNodes, numEdges);
-            long executionTime = GraphParser.measureExecutionTime(() -> {
-                BFSearch.bfSearch(graph, "Node0"); // Startknoten kann angepasst werden
+            long executionTime = AnalysisUtils.measureExecutionTime(() -> {
+                BFSearch.bfSearch(graph, "Node0", "Node");
             });
             System.out.println("Für " + numNodes + " Knoten und " + numEdges + " Kanten: " + executionTime + " Millisekunden.");
         }
@@ -47,10 +39,10 @@ public class BFSearchTestSuite {
         Graph graph = new SingleGraph("randomGraph");
         GraphParser.generateRandomGraph(graph, numNodes, numEdges);
         System.out.println("Vor Ausführung von BFS:");
-        GraphParser.checkMemoryUsage(() -> {});
+        AnalysisUtils.checkMemoryUsage(() -> {});
         System.out.println("Nach Ausführung von BFS:");
-        GraphParser.checkMemoryUsage(() -> {
-            BFSearch.bfSearch(graph, "Node0"); // Startknoten kann angepasst werden
+        AnalysisUtils.checkMemoryUsage(() -> {
+            BFSearch.bfSearch(graph, "Node0", "NodeA");
         });
     }
 
@@ -68,10 +60,9 @@ public class BFSearchTestSuite {
         graph.addEdge("CA", "C", "A");
 
         // Führe den BFS-Algorithmus aus
-        BFSearch.bfSearch(graph, "A"); // Startknoten kann angepasst werden
+        BFSearch.bfSearch(graph, "A", "B");
 
         // Überprüfe die Ausgabe oder andere erwartete Ergebnisse
-        // Hier könntest du zum Beispiel überprüfen, ob die besuchten Knoten die erwarteten sind
     }
 
 
@@ -88,8 +79,8 @@ public class BFSearchTestSuite {
         noEdgeGraph.addNode("B");
 
         // Führe den BFS-Algorithmus aus und überprüfe die Ergebnisse
-        BFSearch.bfSearch(singleNodeGraph, "A");
-        BFSearch.bfSearch(noEdgeGraph, "A");
+        BFSearch.bfSearch(singleNodeGraph, "A", "B");
+        BFSearch.bfSearch(noEdgeGraph, "A", "B");
     }
 
 
@@ -105,7 +96,7 @@ public class BFSearchTestSuite {
 
         // Führe den BFS-Algorithmus aus und messe die Ausführungszeit
         long startTime = System.currentTimeMillis();
-        BFSearch.bfSearch(largeGraph, "Node0"); // Startknoten kann angepasst werden
+        BFSearch.bfSearch(largeGraph, "Node0", "Node1");
         long endTime = System.currentTimeMillis();
         long executionTime = endTime - startTime;
         System.out.println("Ausführungszeit für extrem großen Graphen: " + executionTime + " Millisekunden.");

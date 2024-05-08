@@ -2,6 +2,7 @@ package org.aufgabe01;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.utils.AnalysisUtils;
 
 public class MainTest {
 
@@ -15,18 +16,18 @@ public class MainTest {
         GraphParser.generateRandomGraph(graph, numNodes, numEdges);
 
         // Ausführung und Messung von BFS, Laufzeit und Speicherverbrauch
-        long executionTime = GraphParser.measureExecutionTime(() -> {
-            BFSearch.bfSearch(graph, "Node0"); // Startknoten kann angepasst werden
+        long executionTime = AnalysisUtils.measureExecutionTime(() -> {
+            BFSearch.bfSearch(graph, "Node0", "Node1");
         });
 
         System.out.println("BFS wurde in " + executionTime + " Millisekunden ausgeführt.");
 
         System.out.println("Vor Ausführung von BFS:");
-        GraphParser.checkMemoryUsage(() -> {}); // Leerlauf, um den Speicherverbrauch vor der BFS-Ausführung zu messen
+        AnalysisUtils.checkMemoryUsage(() -> {}); // Leerlauf, um den Speicherverbrauch vor der BFS-Ausführung zu messen
 
         System.out.println("Nach Ausführung von BFS:");
-        GraphParser.checkMemoryUsage(() -> {
-            BFSearch.bfSearch(graph, "Node0"); // Startknoten kann angepasst werden
+        AnalysisUtils.checkMemoryUsage(() -> {
+            BFSearch.bfSearch(graph, "Node0", "Node1"); // Startknoten kann angepasst werden
         });
     }
 }
