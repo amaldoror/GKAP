@@ -14,10 +14,11 @@ public class MainTest {
         // Erstellen des Graphen
         Graph graph = new SingleGraph("randomGraph");
         GraphParser.generateRandomGraph(graph, numNodes, numEdges);
+        GraphParser.saveGraphToFile(graph, "resources\\graphs");
 
         // Ausführung und Messung von BFS, Laufzeit und Speicherverbrauch
         long executionTime = AnalysisUtils.measureExecutionTime(() -> {
-            BFSearch.bfSearch(graph, "Node0", "Node1");
+            BFS.bfSearch(graph, "Node0", "Node1");
         });
 
         System.out.println("BFS wurde in " + executionTime + " Millisekunden ausgeführt.");
@@ -27,7 +28,7 @@ public class MainTest {
 
         System.out.println("Nach Ausführung von BFS:");
         AnalysisUtils.checkMemoryUsage(() -> {
-            BFSearch.bfSearch(graph, "Node0", "Node1"); // Startknoten kann angepasst werden
+            BFS.bfSearch(graph, "Node0", "Node1");
         });
     }
 }

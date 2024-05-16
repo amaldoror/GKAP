@@ -1,29 +1,53 @@
 package org.aufgabe01;
 
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.SingleGraph;
 
 import java.util.*;
 
 /**
- * <b><u>Breadth-First Search (BFS)</u></b>
+ * <b><u>Breadth-First-Search Algorithmus</u></b>
  * <br><br>
- * Diese Klasse implementiert den Breadth-First Search Algorithmus zur Suche eines Pfads
- * von einem Startknoten zu einem Zielknoten in einem Graphen.
+ * 1. <u>Startpunkt wählen:</u> Wähle einen Startknoten im Graphen aus, von dem aus die Suche beginnen soll. <br>
+ * 2. <u>Initialisierung:</u> Markiere den Startknoten als besucht und füge ihn einer Warteschlange hinzu. Dies ist die Queue, in der die nächsten Knoten, die besucht werden sollen, gespeichert werden. <br>
+ * 3. <u>Schleife:</u> Führe die folgenden Schritte so lange aus, bis die Warteschlange leer ist: <br>
+ *    a. Nehme den Knoten aus der Warteschlange und betrachte alle seine unbesuchten Nachbarn. <br>
+ *    b. Markiere jeden Nachbarn als besucht und füge ihn der Warteschlange hinzu. <br>
+ * 4. <u>Wiederholung:</u> Fahre mit Schritt 3 fort, bis die Warteschlange leer ist.
+ *    Zu diesem Zeitpunkt wurden alle erreichbaren Knoten besucht. <br>
+ * 5. <u>Ergebnis:</u> Die Reihenfolge, in der die Knoten besucht wurden,
+ *    entspricht einer Breitensuche des Graphen ab dem gewählten Startknoten. <br>
  */
 public class BFS {
+
+    public static void main(String[] args) {
+        Graph g = setupGraph();
+        g.display();
+        bfs(g, "Node0", "Node1");
+    }
+
+    public static Graph setupGraph(){
+        System.setProperty("org.graphstream.ui", "swing");
+        int numNodes = 10;
+        int numEdges = 10;
+        Graph graph = new SingleGraph("ExampleGraph");
+        return GraphParser.generateRandomGraph(graph, numNodes, numEdges);
+    }
 
     /**
      * Führt den BFS-Algorithmus auf dem gegebenen Graphen aus, um einen Pfad von
      * einem Startknoten zu einem Zielknoten zu finden.
      *
      * @param graph        Der Graph, in dem die Suche durchgeführt werden soll.
-     * @param startNodeID  Die ID des Startknotens.
-     * @param targetNodeID   Die ID des Zielknotens.
+     * @param startNodeId  Die ID des Startknotens.
+     * @param targetNodeId Die ID des Zielknotens.
      */
-    public static void bfSearch(Graph graph, String startNodeID, String targetNodeID) {
-        Node startNode = graph.getNode(startNodeID);
-        Node targetNode = graph.getNode(targetNodeID);
+    public static void bfs(Graph graph, String startNodeId, String targetNodeId) {
+
+        Node startNode = graph.getNode(startNodeId);
+        Node targetNode = graph.getNode(targetNodeId);
 
         if (startNode == null || targetNode == null) {
             System.err.println("Start- oder Zielknoten nicht im Graphen gefunden.");
@@ -31,67 +55,47 @@ public class BFS {
         }
 
         // Queue für die zu besuchenden Knoten
-        Queue<Node> queue = new ArrayDeque<>();
-        // Menge zur Verfolgung der besuchten Knoten
-        Set<Node> visitedNodes = new HashSet<>();
-        // Menge zur Verfolgung des Pfades
-        Set<Node> path = new HashSet<>();
-        // Mapping der Knoten zum Vorgängerknoten
-        Map<Node, Node> predecessorMap = new HashMap<>();
+        Queue<Node> queue = new LinkedList<>();
+        Map<String, String> predecessorMap = new HashMap<>();
+        List<String> path = new ArrayList<>();
 
+        // Markierung für besuchte Knoten
+        startNode.setAttribute("visited", true);
         queue.offer(startNode);
-        visitedNodes.add(startNode);
+        predecessorMap.put(startNode.getId(), null);
 
-        // BFS durchführen
+
+        // BFS-Schleife
         while (!queue.isEmpty()) {
+            // Aktuellen Knoten aus der Queue holen
             Node currentNode = queue.poll();
+            System.out.println(currentNode.getId());
 
-            // Zielknoten erreicht
-            if (currentNode == targetNode) {
-                reconstructPath(predecessorMap, startNode, targetNode);
+            if (currentNode.getId().equals(targetNodeId)) {
+                // Rekonstruiere den Pfad und gib ihn zurück
+                String predecessor = predecessorMap.get(targetNodeId);
+                path.add(0, targetNodeId);
+                while (predecessor != null) {
+                    path.add(0, predecessor);
+                    predecessor = predecessorMap.get(predecessor);
+                }
+                System.out.println("Pfad vom Start- zum Zielknoten: " + path);
                 return;
             }
 
-            // Über alle Nachbarn des aktuellen Knotens iterieren
-            for (Node neighbor : currentNode.neighborNodes().toList()) {
-                if (!visitedNodes.contains(neighbor)) {
+            for (Edge edge : currentNode.leavingEdges().toList()) {
+                Node neighbor = edge.getTargetNode();
+                if (!neighbor.hasAttribute("visited")) {
+                    neighbor.setAttribute("visited", true);
                     queue.offer(neighbor);
-                    visitedNodes.add(neighbor);
-                    predecessorMap.put(neighbor, currentNode);
+                    predecessorMap.put(neighbor.getId(), currentNode.getId());
                 }
             }
         }
 
-
-        if (targetNode != null && targetNode.hasAttribute("visited")) {
-            System.out.println("Der kürzeste Weg von " + startNodeID + " zu " + targetNodeID + " wurde gefunden.");
-        } else {
-            System.out.println("Es wurde kein Weg von " + startNodeID + " zu " + targetNodeID + " gefunden.");
+        // Reset der Besuchsattribute nach dem Durchlauf
+        for (Node node : graph) {
+            node.removeAttribute("visited");
         }
-    }
-
-    /**
-     * Rekonstruiert den Pfad vom Startknoten bis zum Zielknoten und gibt ihn aus.
-     *
-     * @param predecessorMap  Eine Map, die jeden Knoten mit seinem Vorgängerknoten verbindet.
-     * @param startNode       Der Startknoten.
-     * @param goalNode        Der Zielknoten.
-     */
-    private static void reconstructPath(Map<Node, Node> predecessorMap, Node startNode, Node goalNode) {
-        System.out.println("Pfad gefunden:");
-        Node currentNode = goalNode;
-        while (currentNode != startNode) {
-            System.out.print(currentNode.getId());
-            Node predecessor = predecessorMap.get(currentNode);
-            if (predecessor != null) {
-                System.out.print(" <- ");
-                currentNode = predecessor;
-            } else {
-                System.err.println("Fehler: Konnte Pfad nicht rekonstruieren.");
-                return;
-            }
-        }
-        System.out.print(startNode.getId());
-        System.out.println();
     }
 }

@@ -2,7 +2,7 @@ package org.aufgabe01;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
+import org.graphstream.graph.IdAlreadyInUseException;
 import org.graphstream.graph.implementations.SingleGraph;
 
 import java.io.*;
@@ -15,7 +15,9 @@ import java.util.regex.Pattern;
  */
 public class GraphParser {
 
-    private static int graphCount = 0; // Zählt die Anzahl der Graphen
+    String nodeA, nodeB, direction;
+    boolean isDirected = false;
+    boolean isWeighted = false;
 
 
     /**
@@ -70,7 +72,6 @@ public class GraphParser {
         return true;
     }
 
-
     /**
      * Erstellt einen Graphen aus einer .gka-Datei.
      *
@@ -78,7 +79,13 @@ public class GraphParser {
      * @return Der Graph der erstellt wurde.
      */
     public static Graph makeGraphFromFile(String filePath) {
-        System.setProperty("org.graphstream.ui", "swing");
+        Graph graph = readGkaFile(filePath);
+        visualizeGraph(graph);
+        return graph;
+    }
+
+
+    private static Graph readGkaFile(String filePath) {
         int count = 0;
         int weight;
         String nodeA, nodeB, direction;
@@ -92,9 +99,8 @@ public class GraphParser {
         }
 
         // Erstelle einen Graphen mit eindeutiger ID
-        String graphID = "graph" + graphCount++;
+        String graphID = "graph" + count++;
         Graph graph = new SingleGraph(graphID);
-
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String graphText;
@@ -122,8 +128,8 @@ public class GraphParser {
                     isDirected = direction.equals("->");
 
                     // Füge die Knoten zum Graphen hinzu, falls sie nicht bereits existieren
-                    addNodeIfNotExists(graph, nodeA);
-                    addNodeIfNotExists(graph, nodeB);
+                    addNode(graph, nodeA);
+                    addNode(graph, nodeB);
 
                     // Füge die Kante zum Graphen hinzu
                     addEdge(graph, nodeA, nodeB, isDirected, isWeighted, weight);
@@ -148,14 +154,21 @@ public class GraphParser {
     }
 
 
+    public static void visualizeGraph(Graph graph){
+        if (System.getProperties().containsKey("org.graphstream.ui")) {
+            graph.display();
+        }
+    }
+
+
     /**
      * Fügt einen Knoten zum Graphen hinzu, wenn der Knoten noch nicht existiert.
      *
      * @param graph  Der Graph, dem ein Knoten hinzugefügt wird.
      * @param nodeId Die ID des hinzugefügten Knotens.
      */
-    private static void addNodeIfNotExists(Graph graph, String nodeId) {
-        if (!isNodeExistent(graph, nodeId)) {
+    static void addNode(Graph graph, String nodeId) {
+        if (graph.getNode(nodeId) == null) {
             graph.addNode(nodeId);
             graph.getNode(nodeId).setAttribute("ui.label", nodeId);
             graph.getNode(nodeId).setAttribute("ui.style",
@@ -164,7 +177,6 @@ public class GraphParser {
                             "text-alignment: at-left; ");
         }
     }
-
 
     /**
      * Fügt eine Kante zum Graphen hinzu.
@@ -176,53 +188,26 @@ public class GraphParser {
      * @param isWeighted Ist der Graph gewichtet?
      * @param weight     Gewicht der Kante (falls gewichtet).
      */
-    private static void addEdge(Graph graph, String nodeA, String nodeB, boolean isDirected, boolean isWeighted, int weight) {
+    static void addEdge(Graph graph, String nodeA, String nodeB, boolean isDirected, boolean isWeighted, int weight) {
         String edgeId = nodeA + nodeB;
 
-        // Bestimme die eindeutige Kanten-ID, abhängig von der Richtung
-        if (!isDirected) {
-            edgeId = nodeA.compareTo(nodeB) < 0 ? nodeA + nodeB : nodeB + nodeA;
-        }
-
-        // Überprüfe, ob die Kante bereits existiert, falls nicht, füge sie hinzu
+        // Überprüfe, ob die Kante noch nicht existiert und füge sie hinzu.
         if (graph.getEdge(edgeId) == null) {
             Edge edge = graph.addEdge(edgeId, nodeA, nodeB, isDirected);
+
+
             // Füge das Gewicht zur Kante hinzu, falls sie gewichtet ist
             if (isWeighted) {
-                edge.setAttribute("weight", weight);
-                edge.setAttribute("ui.label", weight);
-                edge.setAttribute("ui.style", "text-size: 9;");
+                graph.getEdge(edge.getId()).setAttribute("weight", weight);
             }
         } else {
             System.err.println("Edge " + edgeId + " already exists");
         }
     }
 
-
     /**
-     * Überprüft, ob ein Knoten mit dem angegebenen Namen bereits im Graphen vorhanden ist.
-     *
-     * @param graph     Der Graph, in dem überprüft werden soll.
-     * @param nodeID    Der Name des Knotens, der überprüft werden soll.
-     * @return          True, wenn der Knoten bereits vorhanden ist, sonst false.
-     */
-    public static boolean isNodeExistent(Graph graph, String nodeID) {
-        return graph.getNode(nodeID) != null;
-    }
-
-    /**
-     * Überprüft, ob eine Kante mit dem angegebenen Namen bereits im Graphen vorhanden ist.
-     *
-     * @param graph     Der Graph, in dem überprüft werden soll.
-     * @param edgeID    Der Name der Kante, die überprüft werden soll.
-     * @return          True, wenn der Knoten bereits vorhanden ist, sonst false.
-     */
-    public static boolean isEdgeExistent(Graph graph, String edgeID) {
-        return graph.getEdge(edgeID) != null;
-    }
-
-    /**
-     * Generiert einen zufälligen Graphen mit einer gegebenen Anzahl von Knoten und Kanten.
+     * Generiert einen zufälligen Graphen mit einer gegebenen Anzahl von Knoten und Kanten.<br>
+     * Per Default ist der Graph ungerichtet und ungewichtet.
      *
      * @param graph     Der Graph, der aktualisiert werden soll.
      * @param numNodes  Die Anzahl der Knoten im Graphen.
@@ -230,27 +215,41 @@ public class GraphParser {
      * @param isDirected Ist der Graph gerichtet? Default ist false
      * @param isWeighted Ist der Graph gewichtet? Default ist false
      */
-    public static void generateRandomGraph(Graph graph, int numNodes, int numEdges, boolean isDirected, boolean isWeighted){
-        _generateRandomGraph(graph, numNodes, numEdges, isDirected, isWeighted);
+    public static Graph generateRandomGraph(Graph graph, int numNodes, int numEdges, boolean isDirected, boolean isWeighted){
+        return _generateRandomGraph(graph, numNodes, numEdges, isDirected, isWeighted);
     }
 
-    public static void generateRandomGraph(Graph graph, int numNodes, int numEdges){
-        _generateRandomGraph(graph, numNodes, numEdges, false, false);
+    /**
+     * Generiert einen zufälligen Graphen mit einer gegebenen Anzahl von Knoten und Kanten.<br>
+     * Per Default ist der Graph ungerichtet und ungewichtet.
+     *
+     * @param graph     Der Graph, der aktualisiert werden soll.
+     * @param numNodes  Die Anzahl der Knoten im Graphen.
+     * @param numEdges  Die Anzahl der Kanten im Graphen.
+     */
+    public static Graph generateRandomGraph(Graph graph, int numNodes, int numEdges){
+        return _generateRandomGraph(graph, numNodes, numEdges, false, false);
     }
 
-    public static void generateRandomGraph(Graph graph){
+    /**
+     * Generiert einen zufälligen Graphen mit einer gegebenen Anzahl von Knoten und Kanten.<br>
+     * Per Default ist der Graph ungerichtet und ungewichtet.<br>
+     *
+     * @param graph     Der Graph, der aktualisiert werden soll.
+     */
+    public static Graph generateRandomGraph(Graph graph){
         Random rand = new Random();
-        _generateRandomGraph(graph, rand.nextInt(), rand.nextInt(), false, false);
+        return _generateRandomGraph(graph, rand.nextInt(), rand.nextInt(), false, false);
     }
 
-    public static void generateRandomGraph(){
+    public static Graph generateRandomGraph(){
         Random rand = new Random();
         Graph graph = new SingleGraph("randomGraph");
-        _generateRandomGraph(graph, rand.nextInt(), rand.nextInt(), false, false);
+        return _generateRandomGraph(graph, rand.nextInt(), rand.nextInt(), false, false);
     }
 
     // Private helper method
-    private static void _generateRandomGraph(Graph graph, int numNodes, int numEdges, boolean isDirected, boolean isWeighted) {
+    private static Graph _generateRandomGraph(Graph graph, int numNodes, int numEdges, boolean isDirected, boolean isWeighted) {
         Random random = new Random();
         graph.getAttribute("");
         String direction = isDirected ? " -> " : " -- ";
@@ -259,16 +258,41 @@ public class GraphParser {
         // Knoten hinzufügen
         for (int i = 0; i < numNodes; i++) {
             String nodeName = "Node" + i;
-            graph.addNode(nodeName);
+            GraphParser.addNode(graph, nodeName);
         }
 
         // Kanten hinzufügen
         for (int i = 0; i < numEdges; i++) {
             String nodeA = "Node" + random.nextInt(numNodes);
             String nodeB = "Node" + random.nextInt(numNodes);
-            String weight = isWeighted ? " : " + random.nextInt() + ";" : "";
-            graph.addEdge((nodeA + direction + nodeB + weight), nodeA, nodeB);
+            String edge = nodeA + nodeB;
+
+            //String weight = isWeighted ? (" : " + random.nextInt() + ";") : "";
+            int weight = random.nextInt();
+            GraphParser.addEdge(graph, nodeA, nodeB, isDirected, isWeighted, weight);
+            graph.getEdge(edge).setAttribute("weight", weight);
         }
+        return graph;
     }
 
+
+    public static Graph generateGraph(){
+        return new SingleGraph("Graph");
+    }
+
+    public static Graph generateGraph(String filename){
+        return new SingleGraph(filename);
+    }
+
+    public static Graph generateGraph(String filename, boolean isDirected, boolean isWeighted, int numNodes, int numEdges){
+        return new SingleGraph(filename, isDirected, isWeighted, numNodes,numEdges);
+    }
+
+    public static Graph generateGraphFromFile(String filename, boolean isDirected, boolean isWeighted, int numNodes, int numEdges){
+        return null;
+    }
+
+    public static void showGraph(Graph graph) {
+        graph.display();
+    }
 }

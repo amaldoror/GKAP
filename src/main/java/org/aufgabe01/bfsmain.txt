@@ -1,0 +1,41 @@
+    public static void main(String[] args) {
+        Graph graph = setupGraph();
+
+        // Füge Knoten zum Graphen hinzu
+        for (int i = 0; i<26; i++){
+            GraphParser.addNode(graph,"A" + i);
+        }
+        //GraphParser.addNode(graph,"B");
+        //GraphParser.addNode(graph,"C");
+        //GraphParser.addNode(graph,"D");
+        //GraphParser.addNode(graph,"E");
+
+
+        // Füge Kanten zum Graphen hinzu
+        GraphParser.addEdge(graph,"A", "B", true, false, 0);
+        GraphParser.addEdge(graph,"A", "C", true, false, 0);
+        GraphParser.addEdge(graph,"B", "C", true, false, 0);
+        GraphParser.addEdge(graph,"B", "D", true, false, 0);
+        GraphParser.addEdge(graph,"C", "E", true, false, 0);
+        GraphParser.addEdge(graph,"D", "E", true, false, 0);
+
+
+        // Bestimme den kürzesten Pfad zwischen zwei Knoten
+        String startNodeID = "A";
+        String targetNodeID = "E";
+        List<Node> shortestPath = BFS.shortestPath(graph, startNodeID, targetNodeID);
+
+        // Gib den kürzesten Pfad aus
+        if (shortestPath != null) {
+            System.out.print("Kürzester Pfad von " + startNodeID + " nach " + targetNodeID + ": ");
+            for (Node node : shortestPath) {
+                System.out.print(node.getId() + " ");
+            }
+            System.out.println();
+        } else {
+            System.out.println("Kein Pfad gefunden von " + startNodeID + " nach " + targetNodeID);
+        }
+        System.setProperty("org.graphstream.ui", "swing");
+
+        graph.display();
+    }

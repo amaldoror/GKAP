@@ -2,20 +2,18 @@ package org.aufgabe01;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.junit.jupiter.api.Test;
 import org.utils.AnalysisUtils;
 
 public class BFSearchTestSuite {
 
     public static void main(String[] args) {
-        performanceTest();
-        memoryTest();
-        validationTest();
-        edgeCaseTest();
-        stressTest();
+
     }
 
     // Testfall: Leistungstest
-    private static void performanceTest() {
+    @Test
+    public void performanceTest() {
         System.out.println("Leistungstest:");
 
         for (int i = 1; i <= 5; i++) {
@@ -24,14 +22,13 @@ public class BFSearchTestSuite {
             Graph graph = new SingleGraph("randomGraph");
             GraphParser.generateRandomGraph(graph, numNodes, numEdges);
             long executionTime = AnalysisUtils.measureExecutionTime(() -> {
-                BFSearch.bfSearch(graph, "Node0", "Node");
+                BFS.bfSearch(graph, "Node0", "Node5");
             });
             System.out.println("Für " + numNodes + " Knoten und " + numEdges + " Kanten: " + executionTime + " Millisekunden.");
         }
     }
-
-    // Testfall: Speichertest
-    private static void memoryTest() {
+    @Test
+    public void memoryTest() {
         int numNodes = 10000;
         int numEdges = 50000;
 
@@ -42,12 +39,12 @@ public class BFSearchTestSuite {
         AnalysisUtils.checkMemoryUsage(() -> {});
         System.out.println("Nach Ausführung von BFS:");
         AnalysisUtils.checkMemoryUsage(() -> {
-            BFSearch.bfSearch(graph, "Node0", "NodeA");
+            BFS.bfSearch(graph, "Node0", "Node5");
         });
     }
 
-    // Testfall: Validierungstest
-    private static void validationTest() {
+    @Test
+    public void validationTest() {
         System.out.println("Validierungstest:");
 
         // Erstelle einen einfachen gerichteten oder ungerichteten Graphen
@@ -60,13 +57,13 @@ public class BFSearchTestSuite {
         graph.addEdge("CA", "C", "A");
 
         // Führe den BFS-Algorithmus aus
-        BFSearch.bfSearch(graph, "A", "B");
+        BFS.bfSearch(graph, "A", "C");
 
         // Überprüfe die Ausgabe oder andere erwartete Ergebnisse
     }
 
-
-    private static void edgeCaseTest() {
+    @Test
+    public void edgeCaseTest() {
         System.out.println("Randtest:");
 
         // Graph mit einem einzigen Knoten
@@ -79,13 +76,12 @@ public class BFSearchTestSuite {
         noEdgeGraph.addNode("B");
 
         // Führe den BFS-Algorithmus aus und überprüfe die Ergebnisse
-        BFSearch.bfSearch(singleNodeGraph, "A", "B");
-        BFSearch.bfSearch(noEdgeGraph, "A", "B");
+        BFS.bfSearch(singleNodeGraph, "A", "B");
+        BFS.bfSearch(noEdgeGraph, "A", "B");
     }
 
-
-    // Testfall: Stresstest
-    private static void stressTest() {
+    @Test
+    public void stressTest() {
         System.out.println("Stresstest:");
 
         // Erstelle einen extrem großen Graphen
@@ -96,10 +92,9 @@ public class BFSearchTestSuite {
 
         // Führe den BFS-Algorithmus aus und messe die Ausführungszeit
         long startTime = System.currentTimeMillis();
-        BFSearch.bfSearch(largeGraph, "Node0", "Node1");
+        BFS.bfSearch(largeGraph, "Node0", "Node100");
         long endTime = System.currentTimeMillis();
         long executionTime = endTime - startTime;
         System.out.println("Ausführungszeit für extrem großen Graphen: " + executionTime + " Millisekunden.");
     }
-
 }
